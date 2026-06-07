@@ -5,6 +5,7 @@
 #include "spinlock.h"
 #include "proc.h"
 #include "defs.h"
+#include "virtio_gpu.c"
 
 struct cpu cpus[NCPU];
 
@@ -694,5 +695,26 @@ procdump(void)
       state = "???";
     printf("%d %s %s", p->pid, state, p->name);
     printf("\n");
+  }
+}
+
+void*
+map_display(void* addr) {
+  struct proc *p = myproc();
+  if(addr == 0){
+    addr = p->sz;
+  }
+  for(int i = 0; i < GPU_FB_PAGES; i++){
+    pte_t *pte = walk(p->pagetable, addr + i * PGSIZE, 1);
+    if(pte != 0 && (*pte & PTE_V) != 0){
+      return (void*)-1;
+    }
+  }
+  int suc = mappages(p->pagetable, (uint64)addr, GPU_FB_PAGES * PGSIZE, (uint64)fb, PTE_U|PTE_R|PTE_W);
+  if(suc == 0){
+    return addr;
+  }
+  else{
+    return -1;
   }
 }

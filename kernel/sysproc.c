@@ -116,5 +116,6 @@ sys_flip_display(void)
 uint64
 sys_map_display(void)
 {
-  return -1;
+  int addr;
+  return map_display(addr);
 }
