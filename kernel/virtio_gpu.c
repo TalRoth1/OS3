@@ -584,3 +584,11 @@ get_fb_addr(void)
 {
   return (void*)fb;
 }
+void*
+get_fb_page(int page_index)
+{
+  if (page_index < 0 || page_index >= FB_PAGES) {
+    return 0;
+  }
+  return fb[page_index]; 
+}

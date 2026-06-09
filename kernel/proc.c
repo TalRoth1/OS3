@@ -702,7 +702,7 @@ void*
 map_display(void* addr) {
   struct proc *p = myproc();
   uint64 va = (uint64)addr;
-  uint64 fb_pa = (uint64)get_fb_addr();
+  // uint64 fb_pa = (uint64)get_fb_addr();
   if(va == 0){
     printf("line 707\n");
     va = PGROUNDUP(p->sz);
@@ -719,18 +719,30 @@ map_display(void* addr) {
     }
   }
   printf("line 722\n");
-
   uint64 size = GPU_FB_PAGES * PGSIZE;
-  int suc = mappages(p->pagetable, va, size, fb_pa, PTE_U|PTE_R|PTE_W);
+  int suc = 0;
+  for(int i = 0; i < GPU_FB_PAGES; i++) {
+    uint64 current_va = va + (i * PGSIZE);
+    uint64 current_pa = (uint64)get_fb_page(i); 
+    if (current_pa == 0) {
+      suc = -1;
+      break;
+    }
+    if (mappages(p->pagetable, current_va, PGSIZE, current_pa, PTE_U|PTE_R|PTE_W) != 0) {
+      suc = -1;
+      break; 
+    }
+  }
   printf("line 726, suc: %d\n", suc);
   if(suc == 0){
     if(va >= p->sz) {
       p->sz = va + size;
     }
-    pri
+    printf("line 731, va: %p\n", va);
     return (void*)va;
   }
   else{
+    printf("line 734\n");
     return (void*)-1;
   }
 }

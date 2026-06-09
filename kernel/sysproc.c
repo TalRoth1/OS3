@@ -119,5 +119,8 @@ sys_map_display(void)
 {
   uint64 addr;
   argaddr(0, &addr);
-  return (uint64)map_display((void*)addr);
+  uint64 answer = (uint64)map_display((void*)addr);
+  printf("sys_map_display: addr=0x%p, answer=0x%p\n", addr, answer);
+  return answer;
+  
 }
