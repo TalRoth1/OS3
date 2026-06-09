@@ -191,6 +191,7 @@ void            virtio_disk_intr(void);
 void            virtio_gpu_init(void);
 void            virtio_gpu_commit(void);
 void            display_daemon(void);
+void*           get_fb_addr(void);
 
 // number of elements in fixed-size array
 #define NELEM(x) (sizeof(x)/sizeof((x)[0]))

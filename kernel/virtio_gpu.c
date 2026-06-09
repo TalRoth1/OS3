@@ -578,3 +578,9 @@ void display_daemon(void)
         acquire(&tickslock);
     }
 }
+
+void*
+get_fb_addr(void)
+{
+  return (void*)fb;
+}

@@ -5,7 +5,7 @@
 #include "spinlock.h"
 #include "proc.h"
 #include "defs.h"
-#include "virtio_gpu.c"
+
 
 struct cpu cpus[NCPU];
 
@@ -701,20 +701,36 @@ procdump(void)
 void*
 map_display(void* addr) {
   struct proc *p = myproc();
-  if(addr == 0){
-    addr = p->sz;
+  uint64 va = (uint64)addr;
+  uint64 fb_pa = (uint64)get_fb_addr();
+  if(va == 0){
+    printf("line 707\n");
+    va = PGROUNDUP(p->sz);
   }
+  if (va % PGSIZE != 0) {
+    printf("line 711\n");
+    return (void*)-1; 
+  }
+  printf("line 713, va: %p\n", va);
   for(int i = 0; i < GPU_FB_PAGES; i++){
-    pte_t *pte = walk(p->pagetable, addr + i * PGSIZE, 1);
+    pte_t *pte = walk(p->pagetable, va + (i * PGSIZE), 0);
     if(pte != 0 && (*pte & PTE_V) != 0){
       return (void*)-1;
     }
   }
-  int suc = mappages(p->pagetable, (uint64)addr, GPU_FB_PAGES * PGSIZE, (uint64)fb, PTE_U|PTE_R|PTE_W);
+  printf("line 722\n");
+
+  uint64 size = GPU_FB_PAGES * PGSIZE;
+  int suc = mappages(p->pagetable, va, size, fb_pa, PTE_U|PTE_R|PTE_W);
+  printf("line 726, suc: %d\n", suc);
   if(suc == 0){
-    return addr;
+    if(va >= p->sz) {
+      p->sz = va + size;
+    }
+    pri
+    return (void*)va;
   }
   else{
-    return -1;
+    return (void*)-1;
   }
 }

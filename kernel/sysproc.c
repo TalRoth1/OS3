@@ -6,6 +6,7 @@
 #include "spinlock.h"
 #include "proc.h"
 
+
 uint64
 sys_exit(void)
 {
@@ -116,6 +117,7 @@ sys_flip_display(void)
 uint64
 sys_map_display(void)
 {
-  int addr;
-  return map_display(addr);
+  uint64 addr;
+  argaddr(0, &addr);
+  return (uint64)map_display((void*)addr);
 }
