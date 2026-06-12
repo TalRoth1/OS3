@@ -201,6 +201,10 @@ int main(int argc, char *argv[])
         fprintf(2, "show_flip: flip_display failed\n");
         exit(1);
     }
+    for(;;) {
+        sleep(10);
+    }
+    exit(0);
 
     exit(0);
 }

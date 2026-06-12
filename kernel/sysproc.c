@@ -102,7 +102,27 @@ sys_uptime(void)
 uint64
 sys_flip_display(void)
 {
-  return -1;
+  printf("sys_flip_display called\n");
+  uint64 buf;
+  argaddr(0, &buf);
+  if (buf % 4096 != 0){
+    printf("sys_flip_display: buffer not page-aligned\n");
+    return -1;
+  }
+  for(int i = 0; i < GPU_FB_PAGES; i++){
+    pte_t *pte = walk(myproc()->pagetable, buf + i*PGSIZE, 0);
+    if(pte == 0 || (*pte & PTE_V) == 0){
+      printf("sys_flip_display: buffer not fully mapped\n");
+      return -1;
+    }
+    if((*pte & PTE_U) == 0 || (*pte & PTE_R) == 0 || (*pte & PTE_W) == 0){
+      printf("sys_flip_display: buffer not mapped with PTE_U|PTE_R|PTE_W\n");
+      return -1;
+    }
+  }
+  printf("sys_flip_display: buffer looks good, flipping display\n");
+  return virtio_gpu_flip(buf);
+  // return 1;
 }
 
 // sys_map_display: map the GPU's kernel framebuffer pages (fb[]) directly

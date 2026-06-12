@@ -592,3 +592,33 @@ get_fb_page(int page_index)
   }
   return fb[page_index]; 
 }
+
+
+void
+get_entries_from_buf(uint64 buf, int n, struct virtio_gpu_mem_entry* entries)
+{
+    struct proc *p = myproc();
+    for(int i = 0; i < n; i++){
+        uint64 va = buf + i * PGSIZE;        
+        uint64 pa = walkaddr(p->pagetable, va);
+        if(pa == 0){
+            panic("get_entries_from_buf: failed");
+        }
+        entries[i].addr = pa;
+        entries[i].length = PGSIZE;
+        entries[i].padding = 0;
+    }
+}
+uint64
+virtio_gpu_flip(uint64 buf)
+{
+    static struct virtio_gpu_mem_entry entries[FB_PAGES];
+    gpu_cmd_detach();
+    
+    get_entries_from_buf(buf, FB_PAGES, entries);
+    
+    gpu_cmd_attach(entries, FB_PAGES);
+            
+    return 0;
+}
+
