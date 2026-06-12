@@ -711,22 +711,22 @@ map_display(void* addr) {
   uint64 va = (uint64)addr;
   // uint64 fb_pa = (uint64)get_fb_addr();
   if(va == 0){
-    printf("line 707\n");
+    printf("line 714\n");
     va = PGROUNDUP(p->sz);
   }
   if (va % PGSIZE != 0) {
-    printf("line 711\n");
+    printf("line 718\n");
     return (void*)-1; 
   }
-  printf("line 713, va: %p\n", va);
+  printf("line 721, va: %p\n", va);
   for(int i = 0; i < GPU_FB_PAGES; i++){
     pte_t *pte = walk(p->pagetable, va + (i * PGSIZE), 0);
     if(pte != 0 && (*pte & PTE_V) != 0){
       return (void*)-1;
     }
   }
-  printf("line 722\n");
-  uint64 size = GPU_FB_PAGES * PGSIZE;
+  printf("line 728\n");
+  //uint64 size = GPU_FB_PAGES * PGSIZE;
   int suc = 0;
   for(int i = 0; i < GPU_FB_PAGES; i++) {
     uint64 current_va = va + (i * PGSIZE);
@@ -740,17 +740,17 @@ map_display(void* addr) {
       break; 
     }
   }
-  printf("line 726, suc: %d\n", suc);
+  printf("line 743, suc: %d\n", suc);
   if(suc == 0){
-    if(va == PGROUNDUP(p->sz)) {
-      p->sz = va + size;
-    }
-    printf("line 731, va: %p\n", va);
+    // if(va == PGROUNDUP(p->sz)) {
+    //   p->sz = va + size;
+    // }
+    printf("line 748, va: %p\n", va);
     myproc()->va_loc = va;
     return (void*)va;
   }
   else{
-    printf("line 734\n");
+    printf("line 753\n");
     return (void*)-1;
   }
 }
