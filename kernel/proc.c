@@ -161,7 +161,6 @@ freeproc(struct proc *p)
   p->trapframe = 0;
   if(p->pagetable){
     if (p != 0 && p->va_loc != 0) {
-      printf("line 164, unmapping display at va: %p\n", p->va_loc);
       uvmunmap(p->pagetable, p->va_loc, GPU_FB_PAGES, 0);
       p->va_loc = 0;
     }
@@ -709,24 +708,18 @@ void*
 map_display(void* addr) {
   struct proc *p = myproc();
   uint64 va = (uint64)addr;
-  // uint64 fb_pa = (uint64)get_fb_addr();
   if(va == 0){
-    printf("line 714\n");
     va = PGROUNDUP(p->sz);
   }
   if (va % PGSIZE != 0) {
-    printf("line 718\n");
     return (void*)-1; 
   }
-  printf("line 721, va: %p\n", va);
   for(int i = 0; i < GPU_FB_PAGES; i++){
     pte_t *pte = walk(p->pagetable, va + (i * PGSIZE), 0);
     if(pte != 0 && (*pte & PTE_V) != 0){
       return (void*)-1;
     }
   }
-  printf("line 728\n");
-  //uint64 size = GPU_FB_PAGES * PGSIZE;
   int suc = 0;
   for(int i = 0; i < GPU_FB_PAGES; i++) {
     uint64 current_va = va + (i * PGSIZE);
@@ -740,17 +733,11 @@ map_display(void* addr) {
       break; 
     }
   }
-  printf("line 743, suc: %d\n", suc);
   if(suc == 0){
-    // if(va == PGROUNDUP(p->sz)) {
-    //   p->sz = va + size;
-    // }
-    printf("line 748, va: %p\n", va);
     myproc()->va_loc = va;
     return (void*)va;
   }
   else{
-    printf("line 753\n");
     return (void*)-1;
   }
 }
